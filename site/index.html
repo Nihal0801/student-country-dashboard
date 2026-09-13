@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Count by Country</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 0 20px;
+      color: #222;
+    }
+
+    h1 {
+      margin-bottom: 5px;
+    }
+
+    .summary {
+      margin: 20px 0;
+      padding: 15px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      padding: 10px 18px;
+      cursor: pointer;
+      margin-bottom: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: left;
+    }
+
+    th {
+      background: #f2f2f2;
+    }
+
+    .error {
+      color: #b00020;
+      margin: 15px 0;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>Student Count by Country</h1>
+  <p>Azure Data Engineering Project</p>
+
+  <div class="summary">
+    <strong>Total Students:</strong>
+    <span id="totalStudents">Loading...</span>
+    <br>
+    <strong>Total Countries:</strong>
+    <span id="totalCountries">Loading...</span>
+  </div>
+
+  <button onclick="loadData()">Refresh Data</button>
+
+  <div id="error" class="error"></div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Country</th>
+        <th>Student Count</th>
+      </tr>
+    </thead>
+
+    <tbody id="tableBody"></tbody>
+  </table>
+
+  <script>
+    async function loadData() {
+      const errorBox = document.getElementById("error");
+      const tableBody = document.getElementById("tableBody");
+
+      errorBox.textContent = "";
+      tableBody.innerHTML = "";
+
+      try {
+        const response = await fetch("/api/student-counts");
+
+        if (!response.ok) {
+          throw new Error("API request failed.");
+        }
+
+        const data = await response.json();
+
+        let totalStudents = 0;
+
+        data.forEach(row => {
+          totalStudents += Number(row.StudentCount);
+
+          const tr = document.createElement("tr");
+
+          const country = document.createElement("td");
+          country.textContent = row.Country;
+
+          const count = document.createElement("td");
+          count.textContent = row.StudentCount;
+
+          tr.appendChild(country);
+          tr.appendChild(count);
+
+          tableBody.appendChild(tr);
+        });
+
+        document.getElementById("totalStudents").textContent = totalStudents;
+        document.getElementById("totalCountries").textContent = data.length;
+
+      } catch (error) {
+        errorBox.textContent =
+          "Unable to load student data. Please try again.";
+      }
+    }
+
+    loadData();
+  </script>
+
+</body>
+</html>
